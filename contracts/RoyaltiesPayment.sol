@@ -22,6 +22,12 @@ contract RoyaltiesPayment is Ownable {
     // A list all those entitled to royalties payment
     address[] public payees;
 
+    // A list of royalty percentages-- must be equal to 100%
+    //uint256[] public percentages;
+
+    //mapping of addresses to royalties % 
+    // mapping(address => uint256) public royaltyPercentages;
+
     // A record of total withdrawal amounts per payee address
     mapping(address => UserBalance) public balances;
 

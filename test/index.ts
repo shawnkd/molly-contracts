@@ -1,6 +1,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { BigNumber } from "ethers";
+import { Marketplace } from "../typechain";
 
 
 describe("Test", function () {
@@ -10,7 +11,8 @@ describe("Test", function () {
     this.alice = this.signers[0]
     this.bob = this.signers[1]
     this.carol = this.signers[2]
-  })
+  }) 
+  
 
 
     it("Should mint a token", async function () {
@@ -39,17 +41,41 @@ describe("Test", function () {
     })
 
     it("should create sale offer", async function () {
+    
       const hash = '123452'
-      const Token = await ethers.getContractFactory("Token");
-      const token = await Token.deploy(this.alice.address);
-      const deployedToken = await token.deployed();
+      this.Token = await ethers.getContractFactory("Token");
+      this.token = await this.Token.deploy(this.alice.address);
+      const deployedToken = await this.token.deployed();
       const NFT = await deployedToken.mint(this.alice.address, hash)
-      const Marketplace = await ethers.getContractFactory("Marketplace");
-      const marketplace = await Marketplace.deploy(deployedToken.address)
-      console.log(await marketplace.makeSellOffer(1, 1))
+      console.log(NFT.address)
+      console.log(await deployedToken.tokensOfOwner(this.alice.address))
 
+      //console.log(await deployedToken.getApproved(1))
+      this.Marketplace = await ethers.getContractFactory("Marketplace");
+      this.marketplace = await this.Marketplace.deploy(deployedToken.address)
+      this.royaltiesPayment = await ethers.getContractFactory("RoyaltiesPayment") 
+      this.sellOffer = expect( await this.marketplace.makeSellOffer(1, 1)).to.emit(this.marketplace, 'NewSellOffer')     
     })
 
+    it("should create buy offer", async function () {
+    
+      const hash = '123452'
+      this.Token = await ethers.getContractFactory("Token");
+      this.token = await this.Token.deploy(this.alice.address);
+      const deployedToken = await this.token.deployed();
+      const NFT = await deployedToken.mint(this.alice.address, hash)
+      console.log(NFT.address)
+      console.log(await deployedToken.tokensOfOwner(this.alice.address))
+
+      //console.log(await deployedToken.getApproved(1))
+      this.Marketplace = await ethers.getContractFactory("Marketplace");
+      this.marketplace = await this.Marketplace.deploy(deployedToken.address)
+      this.royaltiesPayment = await ethers.getContractFactory("RoyaltiesPayment") 
+      this.sellOffer = expect( await this.marketplace.makeSellOffer(1, 1)).to.emit(this.marketplace, 'NewSellOffer') 
+      
+      const buyOffer = expect(await this.marketplace.connect(this.bob).makeBuyOffer(1))
+    })
+  
   });
 
   

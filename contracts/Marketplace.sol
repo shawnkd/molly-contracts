@@ -63,7 +63,9 @@ contract Marketplace {
     /// @param tokenId - id of the token to sell
     /// @param minPrice - minimum price at which the token can be sold
     function makeSellOffer(uint256 tokenId, uint256 minPrice)
-    external isMarketable(tokenId) tokenOwnerOnly(tokenId)
+    external 
+    //  isMarketable(tokenId)
+      tokenOwnerOnly(tokenId)
     {
         // Create sell offer
         activeSellOffers[tokenId] = SellOffer({seller : msg.sender,
@@ -75,7 +77,8 @@ contract Marketplace {
     /// @notice Withdraw a sell offer
     /// @param tokenId - id of the token whose sell order needs to be cancelled
     function withdrawSellOffer(uint256 tokenId)
-    external isMarketable(tokenId)
+    external 
+    // isMarketable(tokenId)
     {
         require(activeSellOffers[tokenId].seller != address(0),
             "No sale offer");
@@ -216,7 +219,9 @@ contract Marketplace {
     ///         (even without a sell offer)
     /// @param tokenId - id of the token whose buy order to accept
     function acceptBuyOffer(uint256 tokenId)
-    external isMarketable(tokenId) tokenOwnerOnly(tokenId) {
+    external 
+    // isMarketable(tokenId)
+     tokenOwnerOnly(tokenId) {
         address currentBuyer = activeBuyOffers[tokenId].buyer;
         require(currentBuyer != address(0),
             "No buy offer");
@@ -247,11 +252,11 @@ contract Marketplace {
             saleValue);
     }
 
-    modifier isMarketable(uint256 tokenId) {
-        require(token.getApproved(tokenId) == address(this),
-            "Not approved");
-        _;
-    }
+    // modifier isMarketable(uint256 tokenId) {
+    //     require(token.getApproved(tokenId) == address(this),
+    //         "Not approved");
+    //     _;
+    // }
     modifier tokenOwnerForbidden(uint256 tokenId) {
         require(token.ownerOf(tokenId) != msg.sender,
             "Token owner not allowed");
