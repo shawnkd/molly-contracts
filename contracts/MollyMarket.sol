@@ -14,8 +14,6 @@ contract MollyMarket is ReentrancyGuard {
     bytes4 private constant _INTERFACE_ID_ERC2981 = 0x2a55205a;
     
      address public owner;
-
-     
      
      constructor() {
          owner = msg.sender;
@@ -57,26 +55,11 @@ contract MollyMarket is ReentrancyGuard {
         supportsInterface(_INTERFACE_ID_ERC2981);
         return success;
     }
-
-    function _deduceRoyalties(uint256 tokenId, uint256 grossSaleValue)
-    internal returns (uint256 netSaleAmount) {
-        // Get amount of royalties to pays and recipient
-        (address royaltiesReceiver, uint256 royaltiesAmount) = token
-        .royaltyInfo(tokenId, grossSaleValue);
-        // Deduce royalties from sale value
-        uint256 netSaleValue = grossSaleValue - royaltiesAmount;
-        // Transfer royalties to rightholder if not zero
-        if (royaltiesAmount > 0) {
-            idToMarketItem[itemId].royaltiesReciever.transfer(royaltiesAmount);
-            // royaltiesReceiver.call{value: royaltiesAmount}('');
-        }
-        // Broadcast royalties payment
-        emit RoyaltiesPaid(tokenId, royaltiesAmount);
-        return netSaleValue;
-    }
      
-    
-    
+    /// @notice Creates marketlisting and emits event
+    /// @param _nftContract - the address of the nft for listing
+    /// @param _tokenId - the token id of the nft for listing
+    /// @param _price - the price of the listing
     function createMarketItem(
         address nftContract,
         uint256 tokenId,
@@ -109,36 +92,23 @@ contract MollyMarket is ReentrancyGuard {
                 false
             );
         }
-
         
+    
     function createMarketSale(
         address nftContract,
         uint256 itemId
         ) public payable nonReentrant {
-
-            
-            
-
             uint price = idToMarketItem[itemId].price;
-            uint saleValue = price;
-            uint grossSaleValue = msg.value;
             uint tokenId = idToMarketItem[itemId].tokenId;
             bool sold = idToMarketItem[itemId].sold;
             require(msg.value == price, "Please submit the asking price in order to complete the purchase");
             require(sold != true, "This Sale has alredy finnished");
-
-            // Pay royalties if applicable
-            if (_checkRoyalties(nftContract)) {
-                netSaleValue = _deduceRoyalties(tokenId, grossSaleValue);
-            }
-
             emit MarketItemSold(
                 itemId,
                 msg.sender
                 );
 
-
-            idToMarketItem[itemId].seller.transfer(netSaleAmount);
+            idToMarketItem[itemId].seller.transfer(msg.value);
             IERC721(nftContract).transferFrom(address(this), msg.sender, tokenId);
             idToMarketItem[itemId].owner = payable(msg.sender);
             _itemsSold.increment();
@@ -162,7 +132,4 @@ contract MollyMarket is ReentrancyGuard {
         return items;
     }
       
-}
-
-
 }

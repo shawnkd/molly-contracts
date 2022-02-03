@@ -30,11 +30,15 @@ contract Highlight is ERC721, ERC721Enumerable, ERC721URIStorage, Ownable {
         string memory name,
         uint memory maxSupply,
         uint memory royaltyPercentage,
-        address initialRoyaltiesReceiver
-    ) public ERC721(_name, "MOLLY") {
+        address initialRoyaltiesReceiver,
+        string memory baseURI
+    ) public ERC721(name, "MOLLY") {
         _maxSupply = maxSupply;
         _royaltiesReceiver = initialRoyaltiesReceiver;
         _royaltiesPercentage = royaltiesPercentage;
+
+        // Royalties interface
+        _registerInterface(_INTERFACE_ID_ERC2981);
         
     }
 
