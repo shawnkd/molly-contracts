@@ -1,13 +1,19 @@
 pragma solidity ^0.8.0;
 
+import "./Highlight.sol"
+
 contract Factory {
-    Token[] public tokens;
+    Highlight[] public highlights;
 
-    event TokenMinted(address tokenOwner, string name, string symbol)
 
-    function mintHighlight(string name, string symbol, string videoURL) external {
-        Token token = new Token(name, symbol, tokenURL)
-        tokens.push(token)
-        emit TokenMinted(msg.sender, name, symbol)
+    function create(
+        string memory _name,
+        uint memory _maxSupply,
+        uint memory _royaltyPercentage,
+        address _initialRoyaltiesReceiver,
+        string memory _baseURI
+    ) public {
+        Highlight highlight = new Highlight(_name, _maxSupply, _royaltyPercentage, _baseURI)
+        highlights.push(highlight);
     }
 }
