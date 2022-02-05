@@ -1,13 +1,13 @@
 module.exports = async function ({ getNamedAccounts, deployments }) {
   const { deploy } = deployments
 
-  const { deployer } = await getNamedAccounts()
+  const { deployer, tokenOwner } = await getNamedAccounts()
 
-  await deploy("Token", {
+  await deploy("Factory", {
     from: deployer,
     log: true,
     deterministicDeployment: false
   })
 }
 
-module.exports.tags = ["Token"]
+module.exports.tags = ["Factory"]

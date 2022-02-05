@@ -5,17 +5,17 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "./IERC2981.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol"
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 
 contract Highlight is ERC721, ERC721Enumerable, ERC721URIStorage, Ownable {
 
     // Maximum amounts of mintable tokens
-    uint256 public constant _maxSupply;
+    uint256 public maxSupply;
 
     //royalty percentage
-    uint256 public constant _royaltiesPercentage;
+    uint256 public royaltiesPercentage;
 
     // Address of the royalties recipient
     address private _royaltiesReceiver;
@@ -26,19 +26,19 @@ contract Highlight is ERC721, ERC721Enumerable, ERC721URIStorage, Ownable {
     //Events
     event Mint(uint256 tokenId, address recipient);
 
-    constructor(
-        string memory name,
-        uint memory maxSupply,
-        uint memory royaltyPercentage,
-        address initialRoyaltiesReceiver,
-        string memory baseURI
-    ) public payable ERC721(name, "MOLLY") {
-        _maxSupply = maxSupply;
-        _royaltiesReceiver = initialRoyaltiesReceiver;
-        _royaltiesPercentage = royaltiesPercentage;
+    bytes4 private constant _INTERFACE_ID_ERC2981 = 0x2a55205a;
 
-        // Royalties interface
-        _registerInterface(_INTERFACE_ID_ERC2981);
+    constructor(
+        string memory _name,
+        uint _maxSupply,
+        uint _royaltiesPercentage,
+        address _initialRoyaltiesReceiver,
+        string memory _baseURI
+    ) public payable ERC721(_name, "MOLLY") {
+        maxSupply = _maxSupply;
+        _royaltiesReceiver = _initialRoyaltiesReceiver;
+        royaltiesPercentage = _royaltiesPercentage;
+
         
     }
 
@@ -50,7 +50,7 @@ contract Highlight is ERC721, ERC721Enumerable, ERC721URIStorage, Ownable {
     external onlyOwner
     returns (uint256 tokenId)
     {
-        require(totalSupply() <= _maxSupply, "All tokens minted");
+        require(totalSupply() <= maxSupply, "All tokens minted");
         require(bytes(hash).length > 0); // dev: Hash can not be empty!
         require(hashes[hash] != 1); // dev: Can't use the same hash twice
         hashes[hash] = 1;
@@ -120,10 +120,20 @@ contract Highlight is ERC721, ERC721Enumerable, ERC721URIStorage, Ownable {
     /// @param _salePrice - sale price of the NFT asset specified by _tokenId
     /// @return receiver - address of who should be sent the royalty payment
     /// @return royaltyAmount - the royalty payment amount for _value sale price
-    function royaltyInfo(uint256 _tokenId, uint256 _salePrice) external view
+    function _royaltyInfo(uint256 _tokenId, uint256 _salePrice) external view
     returns (address receiver, uint256 royaltyAmount) {
-        uint256 _royalties = (_salePrice * royaltiesPercentage) / 100;
-        return (_royaltiesReceiver, _royalties);
+        uint256 royalties = (_salePrice * royaltiesPercentage) / 100;
+        return (_royaltiesReceiver, royalties);
+    }
+
+    function _burn(uint256 tokenId)
+    internal override(ERC721, ERC721URIStorage) {
+        super._burn(tokenId);
+    }
+
+    function _beforeTokenTransfer(address from, address to, uint256 amount)
+    internal override(ERC721, ERC721Enumerable) {
+        super._beforeTokenTransfer(from, to, amount);
     }
 
 
